@@ -9,6 +9,12 @@ export interface AppBindings {
   [key: string]: unknown;
 }
 
+// Variables available through context
+export interface AppVariables {
+  validatedMediaType: string;
+  validatedContentLength: number;
+}
+
 // Type for allowed MIME types
 export const ALLOWED_MIME_TYPES = [
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX

@@ -3,7 +3,7 @@ main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
 [vars]
-ENVIRONMENT = "development"
+ENVIRONMENT = "production"
 
 # Workers AI is required for markdown conversion
 [ai]
@@ -19,25 +19,7 @@ preview_id = "${KV_PREVIEW_ID}"
 # JWT_SIGNING_KEY - for JWT authentication
 # LOG_LEVEL - logging verbosity
 
-[env.production]
-name = "cf-markitdown-prod"
-
-[[env.production.kv_namespaces]]
-binding = "API_KEYS_KV"
-id = "${KV_PROD_ID}"
-
 # Enable Workers Logs
-[env.production.observability]
-enabled = true
-head_sampling_rate = 1
-
-[env.staging]
-name = "cf-markitdown-staging"
-
-[[env.staging.kv_namespaces]]
-binding = "API_KEYS_KV"
-id = "${KV_STAGING_ID}"
-
-[env.staging.observability]
+[observability]
 enabled = true
 head_sampling_rate = 1

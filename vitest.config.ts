@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [cloudflareTest({
     remoteBindings: false,
     wrangler: {
-      configPath: resolve('./wrangler.toml'),
+      configPath: resolve('./wrangler.toml'),   
     },
     miniflare: {
       compatibilityDate: '2024-01-01',

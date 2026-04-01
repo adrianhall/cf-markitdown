@@ -20,8 +20,8 @@
   ],
   "scripts": {
     "dev": "wrangler dev src/index.ts",
-    "deploy": "wrangler deploy src/index.ts --env=production",
-    "build": "wrangler build --env=\"\"",
+    "deploy": "wrangler deploy src/index.ts",
+    "build": "wrangler build",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage || exit 0",
@@ -47,7 +47,8 @@
     "wrangler": "^4.77.0"
   },
   "dependencies": {
-    "hono": "^4.12.9"
+    "hono": "^4.12.9",
+    "jose": "6.2.2"
   },
   "engines": {
     "node": ">=18.0.0"

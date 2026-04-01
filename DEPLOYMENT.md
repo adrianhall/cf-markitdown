@@ -67,25 +67,20 @@ If AI is not enabled, enable it in your CloudFlare Dashboard:
 
 ### Configure wrangler.toml
 
-Make sure your `wrangler.toml` includes:
+The `wrangler.toml` already includes the AI binding:
 
 ```toml
 [ai]
 binding = "AI"
 ```
 
-This binding is already configured in the provided `wrangler.toml`.
-
 ## Step 3: Create KV Namespace for API Keys
 
 ### Create the namespace
 
 ```bash
-# Create production namespace
+# Create KV namespace
 wrangler kv:namespace create "API_KEYS_KV"
-
-# Create staging namespace
-wrangler kv:namespace create "API_KEYS_KV" --env staging
 ```
 
 Example output:
@@ -99,22 +94,18 @@ binding = "API_KEYS_KV"
 id = "5f3a4e7b8c9d..."
 ```
 
-### Update wrangler.toml
+### Update environment variables
 
-Copy the IDs from the output and update your `wrangler.toml`:
+Set the KV namespace ID environment variable:
 
-```toml
-[[kv_namespaces]]
-binding = "API_KEYS_KV"
-id = "your-production-kv-id"
+```bash
+export KV_NAMESPACE_ID="5f3a4e7b8c9d..."
+```
 
-[[env.staging.kv_namespaces]]
-binding = "API_KEYS_KV"
-id = "your-staging-kv-id"
+For preview deployments, also set:
 
-[[env.production.kv_namespaces]]
-binding = "API_KEYS_KV"
-id = "your-production-kv-id"
+```bash
+export KV_PREVIEW_ID="your-preview-kv-id"
 ```
 
 ## Step 4: Configure Secrets
@@ -132,26 +123,15 @@ wrangler secret put JWT_SIGNING_KEY
 # Enter the key when prompted
 ```
 
-For staging/production:
-
-```bash
-wrangler secret put JWT_SIGNING_KEY --env staging
-wrangler secret put JWT_SIGNING_KEY --env production
-```
-
 ### Set Log Level
 
 ```bash
 # Options: debug, info, warn, error
 wrangler secret put LOG_LEVEL
 # Enter: info
-
-# For other environments
-wrangler secret put LOG_LEVEL --env staging
-wrangler secret put LOG_LEVEL --env production
 ```
 
-## Step 5: Deploy to Staging
+## Step 5: Build and Test
 
 ### 1. Build the project
 
@@ -170,45 +150,60 @@ Expected output:
 ### 2. Run tests locally
 
 ```bash
-npm test
+pnpm test
 ```
 
 Ensure all tests pass with minimum 80% coverage.
 
-### 3. Deploy to staging
+## Step 6: Deploy to Production
+
+### 1. Verify all configurations
 
 ```bash
-wrangler deploy --env staging
+# Check wrangler.toml has correct values
+# Verify secrets are set
+wrangler secret list
+
+# Verify KV namespace
+wrangler kv:namespace list
+```
+
+### 2. Deploy
+
+```bash
+pnpm run deploy
+# or
+wrangler deploy
 ```
 
 Expected output:
 
 ```text
 Total Upload: 1.2 MB / gzip: 450 KB
-Uploaded cf-markitdown-staging (time taken: 8.00 s)
-Published cf-markitdown-staging (time taken: 2.00 s)
-https://cf-markitdown-staging.your-account.workers.dev
+Uploaded cf-markitdown (time taken: 8.00 s)
+Published cf-markitdown (time taken: 2.00 s)
+https://cf-markitdown.your-account.workers.dev
 ```
 
-### 4. Verify staging deployment
+### 3. Verify deployment
 
 ```bash
 # Test health endpoint
-curl https://cf-markitdown-staging.your-account.workers.dev/health
+curl https://cf-markitdown.your-account.workers.dev/health
 
 # Should return:
 {"status":"healthy","timestamp":"2024-01-01T12:00:00.000Z"}
 
-# Test conversion with a small PDF
+# Test conversion
 curl -X POST \
-  https://cf-markitdown-staging.your-account.workers.dev/api/v1/convert \
-  -H "Content-Type: application/pdf" \
-  -H "Content-Length: 1024" \
-  -H "Authorization: Bearer YOUR_TEST_JWT" \
-  --data-binary @sample.pdf
+https://cf-markitdown.your-account.workers.dev/api/v1/convert \
+-H "Content-Type: application/pdf" \
+-H "Content-Length: 1024" \
+-H "Authorization: Bearer YOUR_JWT" \
+--data-binary @document.pdf
 ```
 
-## Step 6: Set Up API Keys
+## Step 7: Set Up API Keys
 
 ### Option A: Pre-generate API Keys
 
@@ -219,14 +214,7 @@ openssl rand -hex 16
 
 # Store in KV with prefix
 wrangler kv:key put "apikey:2f3d8a1b..." "active" --binding API_KEYS_KV
-
-# For staging
-wrangler kv:key put "apikey:2f3d8a1b..." "active" --binding API_KEYS_KV --env staging
 ```
-
-### Option B: User Registration System
-
-Create a separate API endpoint or admin interface to generate and store keys. Users receive base64-encoded keys for use in Authorization header.
 
 ### Test API Key
 
@@ -237,76 +225,17 @@ echo -n "2f3d8a1b..." | base64
 
 # Test the key
 curl -X POST \
-  https://cf-markitdown-staging.your-account.workers.dev/api/v1/convert \
-  -H "Content-Type: application/pdf" \
-  -H "Content-Length: 1024" \
-  -H "Authorization: ApiKey MmYzZDhhMWIuLi4=" \
-  --data-binary @sample.pdf
+https://cf-markitdown.your-account.workers.dev/api/v1/convert \
+-H "Content-Type: application/pdf" \
+-H "Content-Length: 1024" \
+-H "Authorization: ApiKey MmYzZDhhMWIuLi4=" \
+--data-binary @document.pdf
 ```
 
-## Step 7: Deploy to Production
-
-### 1. Verify all configurations
+## Step 8: Configure Custom Domain (Optional)
 
 ```bash
-# Check wrangler.toml has production values
-# Verify secrets are set
-wrangler secret list --env production
-
-# Verify KV namespace
-wrangler kv:namespace list | grep prod
-```
-
-### 2. Deploy production
-
-```bash
-wrangler deploy --env production
-```
-
-Expected output:
-
-```text
-Total Upload: 1.2 MB / gzip: 450 KB
-Uploaded cf-markitdown-prod (time taken: 8.00 s)
-Published cf-markitdown-prod (time taken: 2.00 s)
-https://cf-markitdown.your-account.workers.dev
-```
-
-### 3. Verify production deployment
-
-```bash
-# Test health endpoint
-curl https://cf-markitdown-prod.your-account.workers.dev/health
-
-# Test conversion
-curl -X POST \
-  https://cf-markitdown-prod.your-account.workers.dev/api/v1/convert \
-  -H "Content-Type: application/pdf" \
-  -H "Content-Length: 1024" \
-  -H "Authorization: Bearer YOUR_PRODUCTION_JWT" \
-  --data-binary @document.pdf
-```
-
-### 4. Set up production monitoring
-
-Check Workers Logs in CloudFlare Dashboard:
-
-1. Go to Workers & Pages → your worker
-2. Click "Logs" tab
-3. Monitor for errors and performance
-
-Enable observability in `wrangler.toml`:
-
-```toml
-[observability]
-enabled = true
-head_sampling_rate = 1
-```
-
-### 5. Configure custom domain (optional)
-
-```bash
-wrangler publish --env production --custom-domain api.yourdomain.com
+wrangler publish --custom-domain api.yourdomain.com
 ```
 
 Or configure in CloudFlare Dashboard:
@@ -314,6 +243,24 @@ Or configure in CloudFlare Dashboard:
 1. Workers & Pages → your worker
 2. Settings → Triggers → Custom Domains
 3. Add your domain
+
+## Monitoring and Logging
+
+### Check Logs
+
+Monitor logs in the CloudFlare Dashboard:
+
+1. Go to Workers & Pages → your worker
+2. Click "Logs" tab
+3. Monitor for errors and performance
+
+The `wrangler.toml` already includes observability settings:
+
+```toml
+[observability]
+enabled = true
+head_sampling_rate = 1
+```
 
 ## Troubleshooting
 
@@ -323,7 +270,7 @@ Or configure in CloudFlare Dashboard:
 
 ```bash
 # Check JWT token
-wrangler secret get JWT_SIGNING_KEY --env production
+wrangler secret get JWT_SIGNING_KEY
 # Check API key exists
 wrangler kv:key get --binding API_KEYS_KV "apikey:your-key"
 ```
@@ -357,22 +304,8 @@ wrangler ai list
 # Check wrangler.toml config
 # Verify secrets are set
 # Check file size < 10MB (Worker bundle limit)
-wrangler build --env production
+wrangler build
 ```
-
-## Verification Checklist
-
-- [ ] Staging deployment successful
-- [ ] Health endpoint responds
-- [ ] Conversion works with test file
-- [ ] JWT authentication works
-- [ ] API key authentication works
-- [ ] Monitoring/logs visible in dashboard
-- [ ] Error handling tested
-- [ ] Production deployment successful
-- [ ] Custom domain configured (optional)
-- [ ] Documentation updated
-- [ ] Team notified of deployment
 
 ## Rollback Plan
 
@@ -381,16 +314,16 @@ If issues occur after deployment:
 1. **Immediate**: CloudFlare retains previous version for 7 days
 2. **Rollback using Wrangler**:
 
-   ```bash
-   wrangler rollback --env production --yes
-   ```
+```bash
+wrangler rollback --yes
+```
 
 3. **Version tags**: Use git tags to redeploy known good version
 
-   ```bash
-   git checkout v1.0.0
-   wrangler deploy --env production
-   ```
+```bash
+git checkout v1.0.0
+wrangler deploy
+```
 
 ## Cost Considerations
 
