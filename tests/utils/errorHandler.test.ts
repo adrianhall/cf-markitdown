@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { handleUnhandledError } from '../../src/utils/errorHandler';
 import { StructuredLogger } from '../../src/services/logger';
 import { InMemoryWriter } from '../../src/services/logWriters';
@@ -6,30 +6,30 @@ import type { Context } from 'hono';
 import type { AppBindings } from '../../src/types/bindings';
 
 describe('handleUnhandledError', () => {
-  let memoryWriter: InMemoryWriter;
-  let logger: StructuredLogger;
-  let mockContext: Context<{ Bindings: AppBindings }>;
+ let memoryWriter: InMemoryWriter;
+ let logger: StructuredLogger;
+ let mockContext: Context<{ Bindings: AppBindings }>;
 
-  beforeEach(() => {
-    memoryWriter = new InMemoryWriter();
-    logger = new StructuredLogger('ERROR', memoryWriter);
-    memoryWriter.clearLogs();
+ beforeEach(() => {
+ memoryWriter = new InMemoryWriter();
+ logger = new StructuredLogger('ERROR', memoryWriter);
+ memoryWriter.clearLogs();
 
-    mockContext = {
-      env: {
-        AI: {} as any,
-        API_KEYS_KV: {} as any,
-        JWT_SIGNING_KEY: 'test-key',
-        LOG_LEVEL: 'ERROR'
-      },
-      json: (body: any, status: number = 200) => {
-        return new Response(JSON.stringify(body), {
-          status,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }
-    } as unknown as Context<{ Bindings: AppBindings }>;
-  });
+ mockContext = {
+ env: {
+ AI: {} as any,
+ API_KEYS_KV: {} as any,
+ JWT_SIGNING_KEY: 'test-key',
+ LOG_LEVEL: 'ERROR'
+ },
+ json: (body: any, status: number = 200) => {
+ return new Response(JSON.stringify(body), {
+ status,
+ headers: { 'Content-Type': 'application/json' }
+ });
+ }
+ } as unknown as Context<{ Bindings: AppBindings }>;
+ });
 
   it('should log the error with correct message and error details', () => {
     const testError = new Error('Test error message');
@@ -80,17 +80,28 @@ describe('handleUnhandledError', () => {
     expect(logEntry.error).toBe('Type error occurred');
   });
 
-  it('should use default logger when settings not provided', async () => {
-    const testError = new Error('Test with defaults');
-    // Call without settings parameter to test default parameter behavior
-    const result = handleUnhandledError(testError, mockContext);
+ it('should use default logger when settings not provided', async () => {
+ // Spy on console.error to capture and suppress output
+ const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+ 
+ const testError = new Error('Test with defaults');
+ // Call without settings parameter to test default parameter behavior
+ const result = handleUnhandledError(testError, mockContext);
 
-    expect(result).toBeInstanceOf(Response);
-    expect(result.status).toBe(500);
-    expect(result.headers.get('Content-Type')).toBe('application/json');
+ expect(result).toBeInstanceOf(Response);
+ expect(result.status).toBe(500);
+ expect(result.headers.get('Content-Type')).toBe('application/json');
 
-    // Verify JSON response structure
-    const body = await result.json();
-    expect(body).toEqual({ error: 'Internal server error' });
-  });
+ // Verify JSON response structure
+ const body = await result.json();
+ expect(body).toEqual({ error: 'Internal server error' });
+
+ // Validate that console.error was called (message sent to stderr)
+ expect(consoleErrorSpy).toHaveBeenCalled();
+ expect(consoleErrorSpy.mock.calls[0][0]).toContain('Test with defaults');
+ expect(consoleErrorSpy.mock.calls[0][0]).toContain('Unhandled error');
+
+ // Restore the console.error
+ consoleErrorSpy.mockRestore();
+ });
 });

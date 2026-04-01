@@ -1,9 +1,27 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import app from '../../src/index';
 import * as converter from '../../src/services/converter';
+import * as loggerModule from '../../src/services/logger';
 
 describe('POST /api/v1/convert', () => {
-  let mockEnv: any;
+ let mockEnv: any;
+
+ beforeEach(() => {
+ vi.spyOn(console, 'error').mockImplementation(() => {});
+ vi.spyOn(console, 'info').mockImplementation(() => {});
+ vi.spyOn(console, 'warn').mockImplementation(() => {});
+ vi.spyOn(console, 'debug').mockImplementation(() => {});
+ 
+ // Spy on StructuredLogger to suppress all logging output
+ vi.spyOn(loggerModule.StructuredLogger.prototype, 'debug').mockImplementation(() => {});
+ vi.spyOn(loggerModule.StructuredLogger.prototype, 'info').mockImplementation(() => {});
+ vi.spyOn(loggerModule.StructuredLogger.prototype, 'warn').mockImplementation(() => {});
+ vi.spyOn(loggerModule.StructuredLogger.prototype, 'error').mockImplementation(() => {});
+ });
+
+ afterEach(() => {
+ vi.restoreAllMocks();
+ });
 
   beforeEach(() => {
     mockEnv = {

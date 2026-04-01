@@ -8,6 +8,7 @@ ENVIRONMENT = "production"
 # Workers AI is required for markdown conversion
 [ai]
 binding = "AI"
+remote = true
 
 # KV namespace for API keys
 [[kv_namespaces]]

@@ -13,7 +13,7 @@ export default defineConfig({
       compatibilityFlags: ['nodejs_compat'],
       kvNamespaces: ['API_KEYS_KV'],
     },
-    main: 'src/index.ts',
+    main: 'src/index.ts'
   })],
   test: {
     globals: true,

@@ -1,10 +1,17 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { convertFileToMarkdown } from '../../src/services/converter';
 import { StructuredLogger } from '../../src/services/logger';
+import { InMemoryWriter } from '../../src/services/logWriters';
 import { ValidationError } from '../../src/errors';
 
 describe('convertFileToMarkdown', () => {
-  const logger = new StructuredLogger();
+  let memoryWriter: InMemoryWriter;
+  let logger: StructuredLogger;
+
+  beforeEach(() => {
+    memoryWriter = new InMemoryWriter();
+    logger = new StructuredLogger('info', memoryWriter);
+  });
 
   it("should successfully convert file using AI service", async () => {
     const toMarkdownSpy = vi.fn().mockResolvedValue({ data: "# Converted Markdown\n\nContent here" });
