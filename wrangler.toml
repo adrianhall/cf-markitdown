@@ -12,8 +12,8 @@ binding = "AI"
 # KV namespace for API keys
 [[kv_namespaces]]
 binding = "API_KEYS_KV"
-id = "your-kv-namespace-id"
-preview_id = "your-preview-kv-namespace-id"
+id = "${KV_NAMESPACE_ID}"
+preview_id = "${KV_PREVIEW_ID}"
 
 # Secrets (set via wrangler secret put):
 # JWT_SIGNING_KEY - for JWT authentication
@@ -24,7 +24,7 @@ name = "cf-markitdown-prod"
 
 [[env.production.kv_namespaces]]
 binding = "API_KEYS_KV"
-id = "your-production-kv-namespace-id"
+id = "${KV_PROD_ID}"
 
 # Enable Workers Logs
 [env.production.observability]
@@ -36,7 +36,7 @@ name = "cf-markitdown-staging"
 
 [[env.staging.kv_namespaces]]
 binding = "API_KEYS_KV"
-id = "your-staging-kv-namespace-id"
+id = "${KV_STAGING_ID}"
 
 [env.staging.observability]
 enabled = true

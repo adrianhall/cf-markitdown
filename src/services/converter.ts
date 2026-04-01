@@ -13,12 +13,8 @@ export async function convertFileToMarkdown(
   try {
     const uint8Array = new Uint8Array(fileData);
     const blob = new Blob([uint8Array], { type: contentType });
-
-    const conversionResult = await ai.toMarkdown({
-      name: 'document',
-      blob: blob
-    });
-
+    
+    const conversionResult = await ai.toMarkdown({ name: 'document', blob });
     logger.info('File conversion completed', { requestId });
 
     if (typeof conversionResult === 'object' && 'data' in conversionResult) {

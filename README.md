@@ -30,7 +30,7 @@ Converts a document file to Markdown format.
 | Header | Required | Description |
 |--------|----------|-------------|
 | `Content-Type` | Yes | One of: `application/vnd.openxmlformats-officedocument.wordprocessingml.document`, `application/vnd.oasis.opendocument.text`, `application/pdf` |
-| `Content-Length` | Yes | Size of the file in bytes (max 500MB) |
+| `Content-Length` | Yes | Size of the file in bytes (max 48MB) |
 | `Authorization` | Yes | One of: `Bearer <jwt-token>` or `ApiKey <base64-encoded-key>` |
 
 **Authentication Methods:**
@@ -51,7 +51,7 @@ Converts a document file to Markdown format.
 - **400 Bad Request**: Invalid request or conversion failed
 - **401 Unauthorized**: Invalid or missing authentication
 - **411 Length Required**: Missing Content-Length header
-- **413 Payload Too Large**: File exceeds 500MB limit
+- **413 Payload Too Large**: File exceeds 48MB limit
 - **415 Unsupported Media Type**: Invalid Content-Type
 
 **Example:

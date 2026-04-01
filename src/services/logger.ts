@@ -1,15 +1,14 @@
 import type { Logger } from '../types';
+import type { LogWriter } from './logWriters';
+import { ConsoleWriter } from './logWriters';
 
 export class StructuredLogger implements Logger {
-  private enabled: boolean;
-
-  constructor(private logLevel = 'info') {
-    this.enabled = typeof console !== 'undefined';
-  }
+  constructor(
+    private logLevel = 'info',
+    private writer: LogWriter = new ConsoleWriter()
+  ) {}
 
   log(level: string, message: string, meta: Record<string, unknown> = {}): void {
-    if (!this.enabled) return;
-
     const logEntry = {
       timestamp: new Date().toISOString(),
       level,
@@ -17,21 +16,11 @@ export class StructuredLogger implements Logger {
       ...meta
     };
 
-    switch (level) {
-      case 'error':
-        console.error(JSON.stringify(logEntry));
-        break;
-      case 'warn':
-        console.warn(JSON.stringify(logEntry));
-        break;
-      case 'debug':
-        if (this.logLevel === 'debug') {
-          console.debug(JSON.stringify(logEntry));
-        }
-        break;
-      default:
-        console.log(JSON.stringify(logEntry));
+    if (level === 'debug' && this.logLevel !== 'debug') {
+      return; // Skip debug logs when logLevel is not debug
     }
+
+    this.writer.write(level, JSON.stringify(logEntry));
   }
 
   debug(message: string, meta?: Record<string, unknown>): void {

@@ -40,6 +40,7 @@ wrangler whoami
 ```
 
 To create an API token:
+
 1. Go to CloudFlare Dashboard → My Profile → API Tokens
 2. Click "Create Token"
 3. Select "Edit CloudFlare Workers" template
@@ -60,6 +61,7 @@ wrangler ai list
 ```
 
 If AI is not enabled, enable it in your CloudFlare Dashboard:
+
 1. Go to Workers & Pages → AI
 2. Click "Enable Workers AI"
 
@@ -87,7 +89,8 @@ wrangler kv:namespace create "API_KEYS_KV" --env staging
 ```
 
 Example output:
-```
+
+```text
 ✨ Success!
 Add the following to your project `wrangler.toml`:
 
@@ -130,6 +133,7 @@ wrangler secret put JWT_SIGNING_KEY
 ```
 
 For staging/production:
+
 ```bash
 wrangler secret put JWT_SIGNING_KEY --env staging
 wrangler secret put JWT_SIGNING_KEY --env production
@@ -158,7 +162,8 @@ wrangler build
 ```
 
 Expected output:
-```
+
+```text
 ✨ Built successfully, built project size is 1.2 MB.
 ```
 
@@ -177,7 +182,8 @@ wrangler deploy --env staging
 ```
 
 Expected output:
-```
+
+```text
 Total Upload: 1.2 MB / gzip: 450 KB
 Uploaded cf-markitdown-staging (time taken: 8.00 s)
 Published cf-markitdown-staging (time taken: 2.00 s)
@@ -258,7 +264,8 @@ wrangler deploy --env production
 ```
 
 Expected output:
-```
+
+```text
 Total Upload: 1.2 MB / gzip: 450 KB
 Uploaded cf-markitdown-prod (time taken: 8.00 s)
 Published cf-markitdown-prod (time taken: 2.00 s)
@@ -283,6 +290,7 @@ curl -X POST \
 ### 4. Set up production monitoring
 
 Check Workers Logs in CloudFlare Dashboard:
+
 1. Go to Workers & Pages → your worker
 2. Click "Logs" tab
 3. Monitor for errors and performance
@@ -302,6 +310,7 @@ wrangler publish --env production --custom-domain api.yourdomain.com
 ```
 
 Or configure in CloudFlare Dashboard:
+
 1. Workers & Pages → your worker
 2. Settings → Triggers → Custom Domains
 3. Add your domain
@@ -311,6 +320,7 @@ Or configure in CloudFlare Dashboard:
 ### Common Issues
 
 **Authentication Failed**
+
 ```bash
 # Check JWT token
 wrangler secret get JWT_SIGNING_KEY --env production
@@ -319,6 +329,7 @@ wrangler kv:key get --binding API_KEYS_KV "apikey:your-key"
 ```
 
 **KV Not Found**
+
 ```bash
 # Verify namespace binding
 wrangler kv:namespace list
@@ -326,6 +337,7 @@ wrangler kv:namespace list
 ```
 
 **Workers AI Not Available**
+
 ```bash
 # Verify AI is enabled
 wrangler ai list
@@ -333,12 +345,14 @@ wrangler ai list
 ```
 
 **Large File Errors**
+
 ```bash
-# Remember: 500MB limit enforced in code
+# Remember: 48MB limit enforced in code
 # Check memory and CPU limits in CloudFlare metrics
 ```
 
 **Deploy Failed**
+
 ```bash
 # Check wrangler.toml config
 # Verify secrets are set
@@ -366,11 +380,13 @@ If issues occur after deployment:
 
 1. **Immediate**: CloudFlare retains previous version for 7 days
 2. **Rollback using Wrangler**:
+
    ```bash
    wrangler rollback --env production --yes
    ```
 
 3. **Version tags**: Use git tags to redeploy known good version
+
    ```bash
    git checkout v1.0.0
    wrangler deploy --env production

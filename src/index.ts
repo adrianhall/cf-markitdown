@@ -1,9 +1,11 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import type { Context } from 'hono';
 import convertRoute from './routes/convert';
-import { StructuredLogger } from './services/logger';
+import { handleUnhandledError } from './utils/errorHandler';
+import type { AppBindings } from './types/bindings';
 
-const app = new Hono();
+const app = new Hono<{ Bindings: AppBindings }>();
 
 app.use('*', cors({
   origin: '*',
@@ -12,29 +14,12 @@ app.use('*', cors({
   maxAge: 86400
 }));
 
-app.get('/', (c) => {
-  return c.json({
-    service: 'cf-markitdown',
-    version: '1.0.0',
-    description: 'CloudFlare Workers service for converting documents to Markdown'
-  });
-});
-
-app.get('/health', (c) => {
+app.get('/health', (c: Context<{ Bindings: AppBindings }>) => {
   return c.json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
 app.route('/', convertRoute);
 
-app.onError((err, c) => {
-  const logger = new StructuredLogger();
-  logger.error('Unhandled error', err as Error);
-
-  return c.json({ error: 'Internal server error' }, 500);
-});
-
-app.notFound((c) => {
-  return c.json({ error: 'Not found' }, 404);
-});
+app.onError(handleUnhandledError);
 
 export default app;

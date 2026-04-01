@@ -23,7 +23,7 @@ describe('Constants', () => {
     expect(ALLOWED_MIME_TYPES).toContain(SUPPORTED_MIME_TYPES.PDF);
   });
 
-  it('should have correct max file size (500MB)', () => {
-    expect(MAX_FILE_SIZE).toBe(500 * 1024 * 1024);
+  it('should have correct max file size (48MB)', () => {
+    expect(MAX_FILE_SIZE).toBe(48 * 1024 * 1024);
   });
 });

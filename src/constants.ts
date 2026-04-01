@@ -1,4 +1,4 @@
-export const MAX_FILE_SIZE = 500 * 1024 * 1024;
+export const MAX_FILE_SIZE = 48 * 1024 * 1024; // 48MB - CloudFlare Worker memory limit
 
 export const SUPPORTED_MIME_TYPES = {
   DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
