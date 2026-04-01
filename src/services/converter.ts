@@ -1,6 +1,17 @@
 import type { Logger } from '../types';
 import { ValidationError } from '../errors';
 
+/**
+ * @description Converts a file to markdown using the AI service. Takes file data and content type
+ * to produce a markdown string through the AI's toMarkdown capability.
+ * @param {Ai} ai - The Cloudflare AI binding for conversion operations
+ * @param {ArrayBuffer} fileData - The raw binary file data to convert
+ * @param {string} contentType - The MIME type of the file
+ * @param {Logger} logger - Logger instance for tracking conversion progress
+ * @param {string} requestId - Unique identifier for tracking this conversion request
+ * @returns {Promise<string>} A promise resolving to the converted markdown string
+ * @throws {ValidationError} If conversion fails or returns unexpected format
+ */
 export async function convertFileToMarkdown(
   ai: Ai,
   fileData: ArrayBuffer,

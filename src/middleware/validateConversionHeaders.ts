@@ -2,10 +2,22 @@ import type { Context } from 'hono';
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE } from '../constants';
 import type { AppBindings, AppVariables } from '../types/bindings';
 
+/**
+ * @description Extracts the base media type from a content type string, removing parameters
+ * @param {string} contentType - Full content type with possible parameters (e.g., "application/pdf; charset=utf-8")
+ * @returns {string} The extracted media type (e.g., "application/pdf")
+ */
 export function extractMediaType(contentType: string): string {
   return contentType.split(';')[0].trim() || contentType;
 }
 
+/**
+ * @description Express-style middleware that validates conversion request headers
+ * Validates Content-Type, Content-Length, and checks against supported MIME types and size limits
+ * @param {Context<{ Bindings: AppBindings; Variables: AppVariables }>} c - Hono context with app bindings and variables
+ * @param {() => Promise<void>} next - Function to call next middleware in chain
+ * @returns {Promise<Response | void>} Response if validation fails, otherwise void to continue processing
+ */
 export async function validateConversionHeaders(
   c: Context<{ Bindings: AppBindings; Variables: AppVariables }>,
   next: () => Promise<void>

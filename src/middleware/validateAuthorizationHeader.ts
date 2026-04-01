@@ -2,6 +2,13 @@ import type { Context } from "hono";
 import { jwtVerify } from "jose";
 import type { AppBindings, AppVariables } from "../types/bindings";
 
+/**
+ * @description Express-style middleware that validates Authorization header for JWT or API key authentication
+ * Supports two authentication methods: Bearer JWT tokens and ApiKey authentication
+ * @param {Context<{ Bindings: AppBindings; Variables: AppVariables }>} c - Hono context with app bindings and variables
+ * @param {() => Promise<void>} next - Function to call next middleware in chain
+ * @returns {Promise<Response | void>} Response if validation fails, otherwise void to continue processing
+ */
 export async function validateAuthorizationHeader(
   c: Context<{ Bindings: AppBindings; Variables: AppVariables }>,
   next: () => Promise<void>,

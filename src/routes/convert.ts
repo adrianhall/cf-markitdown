@@ -9,6 +9,12 @@ import { validateConversionHeaders } from '../middleware/validateConversionHeade
 
 const app = new Hono<{ Bindings: AppBindings; Variables: AppVariables }>();
 
+/**
+ * @description Processes file conversion requests by validating input, converting via AI service, and returning markdown
+ * Handles authentication logging, file conversion, error handling, and response formatting
+ * @param {Context<{ Bindings: AppBindings; Variables: AppVariables }>} c - Hono context with request and environment
+ * @returns {Promise<Response | void>} HTTP response with markdown or error
+ */
 export const conversionProcessor = async (c: Context<{ Bindings: AppBindings; Variables: AppVariables }>): Promise<Response | void> => {
   const logger: StructuredLogger = new StructuredLogger(c.env.LOG_LEVEL);
   const requestId: string = crypto.randomUUID();
