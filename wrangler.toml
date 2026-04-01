@@ -1,0 +1,43 @@
+name = "cf-markitdown"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+ENVIRONMENT = "development"
+
+# Workers AI is required for markdown conversion
+[ai]
+binding = "AI"
+
+# KV namespace for API keys
+[[kv_namespaces]]
+binding = "API_KEYS_KV"
+id = "your-kv-namespace-id"
+preview_id = "your-preview-kv-namespace-id"
+
+# Secrets (set via wrangler secret put):
+# JWT_SIGNING_KEY - for JWT authentication
+# LOG_LEVEL - logging verbosity
+
+[env.production]
+name = "cf-markitdown-prod"
+
+[[env.production.kv_namespaces]]
+binding = "API_KEYS_KV"
+id = "your-production-kv-namespace-id"
+
+# Enable Workers Logs
+[env.production.observability]
+enabled = true
+head_sampling_rate = 1
+
+[env.staging]
+name = "cf-markitdown-staging"
+
+[[env.staging.kv_namespaces]]
+binding = "API_KEYS_KV"
+id = "your-staging-kv-namespace-id"
+
+[env.staging.observability]
+enabled = true
+head_sampling_rate = 1
